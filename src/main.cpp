@@ -1,21 +1,41 @@
 #include <main.h>
-#include <CLeds.h>
 
-const int DATA_PIN = 1;
-const int CLK_PIN = 2;
-const int CS_PIN = 3;
+#ifdef GAME
+#include <CLedGame.h>
+#elif MARQUEE
+#include <CLedMarquee.h>
+#endif
 
-// CLeds* m_leds;
-MD_MAX72XX* m_leds;
+const int DATA_PIN = 11;    //MOSI [Master Out Slave In]: 11
+const int CLK_PIN = 13;     //SCK  [Master Clock]:        13
+const int CS_PIN = 10;      //SS   [Slave Select]:        10
+const int IN_AXIS_X = 17;   //A3
+const int IN_AXIS_Y = 18;   //A4
+const int IN_BUTTON = 2;
+
+#ifdef GAME
+CLedGame* m_leds;
+#elif MARQUEE
+CLedMarquee* m_leds;
+#endif
 
 void setup()
 {
-    // m_leds = new CLeds();
-    m_leds = new MD_MAX72XX(DATA_PIN, CLK_PIN, CS_PIN);
-    m_leds->begin();
+    #ifdef GAME
+    m_leds = new CLedGame(CS_PIN, IN_AXIS_X, IN_AXIS_Y, IN_BUTTON);
+    #elif MARQUEE
+    m_leds = new CLedMarquee(CS_PIN);
+    #endif
 }
 
 void loop()
 {
-    // m_leds->AllLedsOnOff(true);
+    #ifdef GAME
+    m_leds->StartGame(Snake);
+    #elif MARQUEE
+    m_leds->ShowMarquee(Pacman);
+    delay(500);
+    m_leds->ShowMarquee(Text);
+    delay(500);
+    #endif
 }

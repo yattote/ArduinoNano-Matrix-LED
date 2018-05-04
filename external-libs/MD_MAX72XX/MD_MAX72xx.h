@@ -25,7 +25,7 @@
  Set to 1 (default) to use the Parola hardware modules. The
  software was originally designed to operate with this hardware type.
  */
-#define USE_PAROLA_HW 1
+#define USE_PAROLA_HW 0
 
 /**
  \def USE_GENERIC_HW
@@ -48,7 +48,7 @@
  FC16 modules are similar in format to the ICStation modules but are wired differently.
  Modules are identified by a FC-16 designation on the PCB
   */
-#define USE_FC16_HW 0
+#define USE_FC16_HW 1
 
 /**
  \def USE_OTHER_HW
