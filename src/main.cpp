@@ -23,7 +23,7 @@ CLedMarquee* m_leds;
 void setup()
 {
     #ifdef GAME
-    m_leds = new CLedGame(CS_PIN, IN_AXIS_X, IN_AXIS_Y, IN_BUTTON);
+    m_leds = new CLedGame(CS_PIN, NUM_DEVICES, IN_AXIS_X, IN_AXIS_Y, IN_BUTTON);
     #elif MARQUEE
     m_leds = new CLedMarquee(CS_PIN, NUM_DEVICES);
     #endif

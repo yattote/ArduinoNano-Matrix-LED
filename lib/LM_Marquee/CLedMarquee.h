@@ -25,8 +25,8 @@ public:
         pinMode(IN_BTN, INPUT_PULLUP);
         m_leds = new MD_MAX72XX(csPin, iNumDevices);
         m_leds->begin();
-        m_leds->control(MD_MAX72XX::INTENSITY, MAX_INTENSITY / 2);
-        m_leds->control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);
+        /* Default library values:   control(MD_MAX72XX::INTENSITY, MAX_INTENSITY / 2);
+    Half intensity and auto-update:  control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);       */
 
         m_prevTimeAnim = millis();
         m_currentMarquee = EMarqueeStyle::Text;
@@ -51,4 +51,5 @@ private:
     // Private methods
     void Test();
     void TestAdvanced();
+    void TestTransformations();
 };
