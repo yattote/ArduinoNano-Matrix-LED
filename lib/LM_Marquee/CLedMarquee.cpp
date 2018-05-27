@@ -8,7 +8,8 @@ void CLedMarquee::ShowMarquee(EMarqueeStyle style)
     {
         case EMarqueeStyle::Test:
             Test();
-            TestAdvanced();
+            // TestAdvanced();
+            // TestTransformations();
             break;
 
         case EMarqueeStyle::Text:
@@ -127,7 +128,7 @@ void CLedMarquee::Test()
 
     /// nested rectangles spanning the entire display
     m_leds->clear();
-    for (i = 0; i < 3; i++)     //repeat 3 times
+    for (i = 0; i < 2; i++)     //repeat 2 times
     {
         for (j = 0; j < ROW_SIZE / 2; j++)
         {
@@ -146,7 +147,7 @@ void CLedMarquee::Test()
     for (i = 0; i < m_leds->getColumnCount(); i++)
     {
         m_leds->setColumn(i, 0xff);
-        delay(DELAYTIME / m_iNumDevices);
+        delay(2 * DELAYTIME);
         m_leds->setColumn(i, 0x00);
     }
 
@@ -155,22 +156,11 @@ void CLedMarquee::Test()
     m_leds->update(MD_MAX72XX::OFF);
     for (i = 0; i < 256; i++)
     {
-        m_leds->clear(0);
-        m_leds->setChar(COL_SIZE - 1, i);
-
-        if (m_iNumDevices >= 3)
-        {
-            char hex[3];
-
-            sprintf(hex, "%02X", i);
-
-            m_leds->clear(1);
-            m_leds->setChar((2 * COL_SIZE) - 1, hex[1]);
-            m_leds->clear(2);
-            m_leds->setChar((3 * COL_SIZE) - 1, hex[0]);
-        }
+        m_leds->clear();
+        //FC-16 board's column goes from R to L instead of normal way L to R 
+        m_leds->setChar((COL_SIZE) / 2 + (m_leds->getMaxFontWidth() / 3), i);
         m_leds->update();
-        delay(DELAYTIME * 2);
+        delay(DELAYTIME * 3);
     }
     m_leds->update(MD_MAX72XX::ON);
 }
@@ -377,16 +367,16 @@ void CLedMarquee::TestAdvanced()
     // delay(DELAYTIME);
 
     ///Blinks the display on and off.
-    i = 3;
-    m_leds->clear();
-    while (i > 0)
-    {
-        m_leds->control(MD_MAX72XX::TEST, MD_MAX72XX::ON);
-        delay(DELAYTIME * i);
-        m_leds->control(MD_MAX72XX::TEST, MD_MAX72XX::OFF);
-        delay(DELAYTIME * i);
-        i--;
-    }
+    // i = 3;
+    // m_leds->clear();
+    // while (i > 0)
+    // {
+    //     m_leds->control(MD_MAX72XX::TEST, MD_MAX72XX::ON);
+    //     delay(DELAYTIME * i);
+    //     m_leds->control(MD_MAX72XX::TEST, MD_MAX72XX::OFF);
+    //     delay(DELAYTIME * i);
+    //     i--;
+    // }
 
     /// Uses scan limit function to restrict the number of rows displayed.
     m_leds->clear();
@@ -413,7 +403,7 @@ void CLedMarquee::TestTransformations()
         0b00001000, 0b00011100, 0b00111110, 0b01111111,
         0b00011100, 0b00011100, 0b00111110, 0b00000000
     };
-    MD_MAX72XX::transformType_t t[] =
+    MD_MAX72XX::transformType_t PROGMEM t[] =
     {
         MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
         MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
@@ -434,52 +424,52 @@ void CLedMarquee::TestTransformations()
         MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC,
         MD_MAX72XX::TINV
     };
-    m_leds->clear();
 
     // use the arrow bitmap
+    m_leds->clear();
     m_leds->control(MD_MAX72XX::UPDATE, MD_MAX72XX::OFF);
     for (i = 0; i < m_leds->getDeviceCount(); i++)
         m_leds->setBuffer(((i + 1) * COL_SIZE) - 1, COL_SIZE, arrow);
     m_leds->control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);
     delay(DELAYTIME);
 
-    // run through the transformations
+    // run through all in-table transformations
     m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::ON);
     for (i = 0; i < (sizeof(t) / sizeof(t[0])); i++)
     {
         m_leds->transform(t[i]);
-        delay(DELAYTIME * 4);
-    }
-    m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::OFF);
-
-    /// Demonstrates the use of transform() to move animate font characters on the display.
-    MD_MAX72XX::transformType_t t1[]
-    {
-        MD_MAX72XX::TINV,
-        MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC,
-        MD_MAX72XX::TINV,
-        MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
-        MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
-        MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
-        MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
-        MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
-        MD_MAX72XX::TSD, MD_MAX72XX::TSU, MD_MAX72XX::TSD, MD_MAX72XX::TSU,
-        MD_MAX72XX::TFLR, MD_MAX72XX::TFLR, MD_MAX72XX::TFUD, MD_MAX72XX::TFUD
-    };
-    m_leds->clear();
-
-    // draw something that will show changes
-    m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::OFF);
-    for (i = 0; i < m_leds->getDeviceCount(); i++)
-        m_leds->setChar(((i + 1) * COL_SIZE) - 1, '0' + i);
-    delay(DELAYTIME * 5);
-
-    // run thru transformations
-    for (i = 0; i < (sizeof(t1) / sizeof(t1[0])); i++)
-    {
-        m_leds->transform(t1[i]);
         delay(DELAYTIME * 3);
     }
+    m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::OFF);
+
+    // /// Demonstrates the use of transform() to move animate font characters on the display.
+    // MD_MAX72XX::transformType_t PROGMEM t1[]
+    // {
+    //     MD_MAX72XX::TINV,
+    //     MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC, MD_MAX72XX::TRC,
+    //     MD_MAX72XX::TINV,
+    //     MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
+    //     MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
+    //     MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
+    //     MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL, MD_MAX72XX::TSL,
+    //     MD_MAX72XX::TSR, MD_MAX72XX::TSR, MD_MAX72XX::TSR,
+    //     MD_MAX72XX::TSD, MD_MAX72XX::TSU, MD_MAX72XX::TSD, MD_MAX72XX::TSU,
+    //     MD_MAX72XX::TFLR, MD_MAX72XX::TFLR, MD_MAX72XX::TFUD, MD_MAX72XX::TFUD
+    // };
+
+    // // draw something that will show changes
+    // m_leds->clear();
+    // m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::OFF);
+    // for (i = 0; i < m_leds->getDeviceCount(); i++)
+    //     m_leds->setChar(((i + 1) * COL_SIZE) - 1, '0' + i);
+    // delay(DELAYTIME * 5);
+
+    // // run through all in-table transformations
+    // for (i = 0; i < (sizeof(t1) / sizeof(t1[0])); i++)
+    // {
+    //     m_leds->transform(t1[i]);
+    //     delay(DELAYTIME * 3);
+    // }
 
     /// Display text and animate scrolling using auto wraparound of the buffer
     m_leds->clear();
@@ -488,7 +478,7 @@ void CLedMarquee::TestTransformations()
     // draw something that will show changes
     for (i = 0; i < m_leds->getDeviceCount(); i++)
     {
-        m_leds->setChar(((i + 1) * COL_SIZE) - 1, (i & 1 ? 'M' : 'W'));
+        m_leds->setChar((COL_SIZE / 2) + (m_leds->getMaxFontWidth() / 3), (i & 1 ? 'M' : 'W'));
     }
     delay(DELAYTIME * 5);
 

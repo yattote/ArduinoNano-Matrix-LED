@@ -34,9 +34,9 @@ void loop()
     #ifdef GAME
     m_leds->StartGame(Snake);
     #elif MARQUEE
-    // m_leds->ShowMarquee(EMarqueeStyle::Pacman);
-    // delay(500);
-    m_leds->ShowMarquee(EMarqueeStyle::Test);
+    m_leds->ShowMarquee(EMarqueeStyle::Pacman);
     delay(500);
+    // m_leds->ShowMarquee(EMarqueeStyle::Test);
+    // delay(500);
     #endif
 }
