@@ -1,4 +1,5 @@
 #include "MD_MAX72xx.h"
+#include "TrueRandom.h"
 #include "CCommon.h"
 
 const int IN_BTN = 2;
@@ -13,7 +14,7 @@ const uint8_t PROGMEM pacman[MAX_FRAMES][18] =  // ghost pursued by a pacman. Ma
 };
 const uint8_t DATA_WIDTH = (sizeof(pacman[0]) / sizeof(pacman[0][0]));
 
-enum class EMarqueeStyle { Test, Text, Pacman, BlinkEyes, PushWheel, Shift, Two_Zones };
+enum class EMarqueeStyle { Test, Text, Pacman, BlinkEyes, Shift };
 
 class CLedMarquee
 {
@@ -29,7 +30,6 @@ public:
     Half intensity and auto-update:  control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);       */
         m_leds->control(MD_MAX72XX::INTENSITY, MAX_INTENSITY / 4);
 
-        m_prevTimeAnim = millis();
         m_currentMarquee = EMarqueeStyle::Text;
         m_iNumDevices = iNumDevices;
     };
@@ -47,10 +47,11 @@ private:
     MD_MAX72XX* m_leds;
     EMarqueeStyle m_currentMarquee;
     int m_iNumDevices;
-    int m_prevTimeAnim;
     
     // Private methods
     void Test();
     void TestAdvanced();
     void TestTransformations();
+    void Shift();
+    void ShiftTransform(MD_MAX72XX::transformType_t tt, bool bNew);
 };

@@ -17,33 +17,28 @@ void CLedMarquee::ShowMarquee(EMarqueeStyle style)
 
         case EMarqueeStyle::Pacman:
             //TODO: check Pacman animation works
-            static boolean bInit = true;    // initialise the animation
             int idx;                        // display index (column)
             int frame;                      // current animation frame
             int deltaFrame; 
 
-            // Is it time to animate?
-            if (millis() - m_prevTimeAnim < 75) //TODO: 75 ms animation
-                return;
-            m_prevTimeAnim = millis();			// starting point for next time
+            // // Is it time to animate?
+            // if (millis() - m_prevTimeAnim < 75) //TODO: 75 ms animation
+            //     return;
+            // m_prevTimeAnim = millis();			// starting point for next time
             m_leds->control(MD_MAX72XX::UPDATE, MD_MAX72XX::OFF);
             // Initialise
-            if (bInit)
-            {
-                m_leds->clear();
-                idx = -DATA_WIDTH;
-                frame = 0;
-                deltaFrame = 1;
-                bInit = false;
+            m_leds->clear();
+            idx = -DATA_WIDTH;
+            frame = 0;
+            deltaFrame = 1;
 
-                // Lay out the dots
-                for (uint8_t i = 0; i < m_iNumDevices; i++)
-                {
-                    m_leds->setPoint(3, (i * COL_SIZE) + 3, true);
-                    m_leds->setPoint(4, (i * COL_SIZE) + 3, true);
-                    m_leds->setPoint(3, (i * COL_SIZE) + 4, true);
-                    m_leds->setPoint(4, (i * COL_SIZE) + 4, true);
-                }
+            // Lay out the dots
+            for (uint8_t i = 0; i < m_iNumDevices; i++)
+            {
+                m_leds->setPoint(3, (i * COL_SIZE) + 3, true);
+                m_leds->setPoint(4, (i * COL_SIZE) + 3, true);
+                m_leds->setPoint(3, (i * COL_SIZE) + 4, true);
+                m_leds->setPoint(4, (i * COL_SIZE) + 4, true);
             }
 
             // clear old graphic
@@ -60,21 +55,17 @@ void CLedMarquee::ShowMarquee(EMarqueeStyle style)
                 deltaFrame = -deltaFrame;
 
             // check if we are completed and set initialise for next time around
-            bInit = (idx == m_leds->getColumnCount() + DATA_WIDTH);
+            //bInit = (idx == m_leds->getColumnCount() + DATA_WIDTH);
             m_leds->control(MD_MAX72XX::UPDATE, MD_MAX72XX::ON);
+            delay(75);
 
             break;
 
         case EMarqueeStyle::BlinkEyes:
             break;
 
-        case EMarqueeStyle::PushWheel:
-            break;
-
         case EMarqueeStyle::Shift:
-            break;
-
-        case EMarqueeStyle::Two_Zones:
+            Shift();
             break;
 
         default:
@@ -400,8 +391,8 @@ void CLedMarquee::TestTransformations()
     /// Demonstrates the use of transform() to move and animate bitmaps on the display
     uint8_t PROGMEM arrow[COL_SIZE] =
     {
-        0b00001000, 0b00011100, 0b00111110, 0b01111111,
-        0b00011100, 0b00011100, 0b00111110, 0b00000000
+        0b00001000, 0b00011100, 0b00111110, 0b01111111, //0x08, 0x1c, 0x3E, 0x7F
+        0b00011100, 0b00011100, 0b00111110, 0b00000000  //0x1c, 0x1c, 0x3E, 0x00
     };
     MD_MAX72XX::transformType_t PROGMEM t[] =
     {
@@ -505,6 +496,60 @@ void CLedMarquee::TestTransformations()
     }
 
     m_leds->wraparound(MD_MAX72XX::OFF);
+}
+
+void CLedMarquee::Shift()
+{
+    static int8_t tState = -1;
+    static bool bNew = true;
+    static uint32_t	lastTime = 0;
+    static uint8_t	repeatCount = 0;
+
+    m_leds->control(MD_MAX72XX::WRAPAROUND, MD_MAX72XX::ON);
+    if (bNew)
+        tState = (tState + 1) % 8;
+
+    switch (tState)
+    {
+        case 0: ShiftTransform(MD_MAX72XX::TSL,	bNew);	break;
+        case 1:	ShiftTransform(MD_MAX72XX::TSR,	bNew);	break;
+        case 2:	ShiftTransform(MD_MAX72XX::TSU,	bNew);	break;
+        case 3:	ShiftTransform(MD_MAX72XX::TSD,	bNew);	break;
+        case 4:	ShiftTransform(MD_MAX72XX::TFUD,bNew);	break;
+        case 5:	ShiftTransform(MD_MAX72XX::TFLR,bNew);	break;
+        case 6:	ShiftTransform(MD_MAX72XX::TRC,	bNew);	break;
+        case 7:	ShiftTransform(MD_MAX72XX::TINV,bNew);	break;
+        default:tState = 0;
+    }
+
+    //changeState -> can be interactive with a physical Switch
+    if (repeatCount == 0)
+        repeatCount = 16;   //const int REPEATS_PRESET;
+
+    if (millis()-lastTime >= DELAYTIME * 5)
+    {
+        lastTime = millis();
+        bNew = (--repeatCount == 0);
+    }
+}
+
+void CLedMarquee::ShiftTransform(MD_MAX72XX::transformType_t tt, bool bNew)
+{
+    static uint32_t lastTime = 0;
+
+    if (bNew)
+    {
+        m_leds->clear();
+        for (int i = 0; i < m_iNumDevices; i++)
+            m_leds->setChar(((i + 1) * COL_SIZE) - 1, 'o' + i);
+        lastTime = millis();
+    }
+
+    if (millis() - lastTime >= DELAYTIME * 5)
+    {
+        m_leds->transform(0, m_iNumDevices - 1, tt);
+        lastTime = millis();
+    }
 }
 
 #pragma endregion
